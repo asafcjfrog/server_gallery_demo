@@ -84,11 +84,23 @@ app.post("/uploadPath", async (req, res) => {
     return res.status(400).send({ error: "Invalid URL" });
   }
 
+  // Enhanced validation to prevent SSRF attacks (CVE-2022-35949 mitigation)
+  // Ensure protocol is HTTP or HTTPS only
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return res.status(400).send({ error: "Only HTTP and HTTPS protocols are allowed" });
+  }
+
+  // Block URLs with credentials
+  if (parsedUrl.username || parsedUrl.password) {
+    return res.status(400).send({ error: "URLs with credentials are not allowed" });
+  }
+
   if (!allowedHosts.includes(parsedUrl.hostname) || isPrivateIP(parsedUrl.hostname)) {
     return res.status(400).send({ error: "Host not allowed" });
   }
 
   try {
+    // Use the validated and normalized URL
     const response = await undici.request(parsedUrl.href);
     const body = await response.body.text();
     fs.writeFile(__dirname + "/uploads/" + makeid(12), body, err => {
