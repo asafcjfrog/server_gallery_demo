@@ -4,6 +4,7 @@ description: The dedicated DevSecOps agent for automated security remediation. S
 mcp-servers: 
   custom-mcp:
     url: 'https://productmcpdemo.jfrog.io/mcp'
+    tools: ["*"]
     headers:
       Authorization: 'Bearer ${{ secrets.COPILOT_MCP_ENV_VAR_VALUE }}'
 ---
