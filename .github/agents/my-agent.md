@@ -1,6 +1,12 @@
 ---
 name: JFrog Security Remediation Agent
 description: The dedicated DevSecOps agent for automated security remediation. Scans code, verifies package compliance, and suggests vulnerability fixes using JFrog security intelligence.
+mcp-servers:
+  custom-mcp:
+    type: 'remote'
+    url: 'https://productmcpdemo.jfrog.io/mcp'
+    env:
+      ENV_VAR_NAME: ${{ secrets.COPILOT_MCP_ENV_VAR_VALUE }}
 ---
 
 # My Agent
