@@ -5,6 +5,7 @@ mcp-servers:
   custom-mcp:
     type: 'sse'
     url: 'https://productmcpdemo.jfrog.io/mcp'
+    tools: ['*']
     env: 
       ENV_VAR_NAME: ${{ secrets.COPILOT_MCP_ENV_VAR_VALUE }}
 ---
