@@ -84,11 +84,18 @@ app.post("/uploadPath", async (req, res) => {
     return res.status(400).send({ error: "Invalid URL" });
   }
 
+  // Additional validation to prevent SSRF attacks (CVE-2022-35949 mitigation)
+  // Ensure the URL doesn't contain attempts to override the hostname
+  if (parsedUrl.pathname.startsWith('//') || parsedUrl.pathname.includes('://')) {
+    return res.status(400).send({ error: "Invalid URL format" });
+  }
+
   if (!allowedHosts.includes(parsedUrl.hostname) || isPrivateIP(parsedUrl.hostname)) {
     return res.status(400).send({ error: "Host not allowed" });
   }
 
   try {
+    // Use full URL to avoid SSRF vulnerabilities in undici
     const response = await undici.request(parsedUrl.href);
     const body = await response.body.text();
     fs.writeFile(__dirname + "/uploads/" + makeid(12), body, err => {
