@@ -84,12 +84,20 @@ app.post("/uploadPath", async (req, res) => {
     return res.status(400).send({ error: "Invalid URL" });
   }
 
+  // Validate protocol - only allow HTTP and HTTPS
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return res.status(400).send({ error: "Only HTTP and HTTPS protocols are allowed" });
+  }
+
   if (!allowedHosts.includes(parsedUrl.hostname) || isPrivateIP(parsedUrl.hostname)) {
     return res.status(400).send({ error: "Host not allowed" });
   }
 
   try {
-    const response = await undici.request(parsedUrl.href);
+    // Use explicit URL string to prevent URL manipulation attacks
+    const response = await undici.request(parsedUrl.href, {
+      maxRedirections: 0  // Disable redirects to prevent redirect-based SSRF
+    });
     const body = await response.body.text();
     fs.writeFile(__dirname + "/uploads/" + makeid(12), body, err => {
       if (err) {
