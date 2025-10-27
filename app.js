@@ -88,6 +88,12 @@ app.post("/uploadPath", async (req, res) => {
     return res.status(400).send({ error: "Host not allowed" });
   }
 
+  // Additional validation to prevent SSRF via pathname (CVE-2022-35949 mitigation)
+  // Ensure the pathname doesn't contain scheme separators that could be interpreted as absolute URLs
+  if (parsedUrl.pathname.includes('://') || parsedUrl.pathname.startsWith('//')) {
+    return res.status(400).send({ error: "Invalid URL path" });
+  }
+
   try {
     const response = await undici.request(parsedUrl.href);
     const body = await response.body.text();
